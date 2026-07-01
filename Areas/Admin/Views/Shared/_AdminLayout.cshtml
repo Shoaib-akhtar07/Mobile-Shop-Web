@@ -1,0 +1,121 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <h4 class="text-white"><i class="bi bi-speedometer2"></i> Admin Panel</h4>
+            </div>
+
+            <ul class="list-unstyled components">
+                <li class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard") ? "active" : "")">
+                    <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                </li>
+                <li class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Products") ? "active" : "")">
+                    <a asp-area="Admin" asp-controller="Products" asp-action="Index">
+                        <i  class="bi bi-phone"></i> Products
+                    </a>
+                </li>
+                <li class ="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Categories") ? "active" : "")">
+                    <a asp-area="Admin" asp-controller="Categories" asp-action="Index">
+                        <i class="bi bi-tags"></i> Categories
+                    </a>
+                </li>
+                <li class ="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Brands") ? "active" : "")">
+                    <a asp-area="Admin" asp-controller="Brands" asp-action="Index">
+                        <i class="bi bi-building"></i> Brands
+                    </a>
+                </li>
+                <li class ="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Orders") ? "active" : "")">
+                    <a asp-area="Admin" asp-controller="Orders" asp-action="Index">
+                        <i class="bi bi-cart3"></i> Orders
+                    </a>
+                </li>
+                <li class ="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Orders") ? "active" : "")">
+                    <a asp-area="Admin" asp-controller="Users" asp-action="Index">
+                        <i class="bi bi-people"></i> Users
+                    </a>
+                </li>                             
+                <li>
+                    <a href="#reportsSubmenu" data-bs-toggle="collapse" class="dropdown-toggle">
+                        <i class="bi bi-graph-up"></i> Reports
+                    </a>
+                    <ul class="collapse list-unstyled" id="reportsSubmenu">
+                        <li>
+                            <a asp-area="Admin" asp-controller="Dashboard" asp-action="SalesReport">Sales Report</a>
+                        </li>
+                        <li>
+                            <a asp-area="Admin" asp-controller="Dashboard" asp-action="InventoryReport">Inventory Report</a>
+                        </li>
+                        <li>
+                            <a asp-area="Admin" asp-controller="Dashboard" asp-action="TopProducts">Top Products</a>
+                        </li>
+                    </ul>
+                </li>
+            <div class="sidebar-footer">
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-outline-light btn-sm w-100 mb-2">
+                    <i class="bi bi-shop"></i> View Store
+                </a>
+                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </nav>
+
+        <!-- Page Content -->
+        <div id="content">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <div class="container-fluid">
+                    <button type="button" id="sidebarCollapse" class="btn btn-dark">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <div class="ms-auto">
+                        <span class="navbar-text">
+                            <i class="bi bi-person-circle"></i> @User.Identity?.Name
+                        </span>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container-fluid p-4">
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/admin.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,227 @@
+﻿@model Order
+@{
+    ViewData["Title"] = "Invoice";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Invoice - @Model.OrderNumber</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        body {
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .invoice-header {
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .company-info h2 {
+            color: #007bff;
+            margin-bottom: 5px;
+        }
+
+        .invoice-title {
+            text-align: right;
+        }
+
+        .invoice-title h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 0;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+        }
+
+        .total-row {
+            background-color: #007bff;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        @@media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .invoice-container {
+                box-shadow: none;
+                padding: 20px;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .table th {
+                background-color: #f8f9fa !important;
+                -webkit-print-color-adjust: exact;
+            }
+
+            .total-row {
+                background-color: #007bff !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="no-print mb-3 d-flex justify-content-end gap-2">
+            <button onclick="window.print()" class="btn btn-primary">
+                <i class="fas fa-print"></i> Print Invoice
+            </button>
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Order
+            </a>
+        </div>
+
+        <div class="invoice-header">
+            <div class="row">
+                <div class="col-6 company-info">
+                    <h2>MobileShop</h2>
+                    <p class="mb-0">123 Phone Street, Tech City</p>
+                    <p class="mb-0">Phone: +91 1234567890</p>
+                    <p class="mb-0">Email: support@mobileshop.com</p>
+                </div>
+                <div class="col-6 invoice-title text-end">
+                    <h1>INVOICE</h1>
+                    <p class="mb-0"><strong>Order #:</strong viewers> @Model.OrderNumber</p>
+                    <p class="mb-0"><strong>Date:</strong> @Model.OrderDate.ToString("MMM dd, yyyy")</p>
+                    <p class="mb-0"><strong>Status:</strong> @Model.Status</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-6">
+                <h6 class="text-muted text-uppercase fw-bold mb-3">Bill To:</h6>
+                @if (Model.User != null)
+                {
+                    <p class="mb-1 fw-bold">@Model.User.FullName</p>
+                    <p class="mb-1">@Model.User.Email</p>
+                    <p class="mb-1">@Model.User.PhoneNumber</p>
+                }
+                else
+                {
+                    <p class="mb-1 fw-bold">Guest Customer</p>
+                }
+            </div>
+            <div class="col-6">
+                <h6 class="text-muted text-uppercase fw-bold mb-3">Ship To:</h6>
+                <p class="mb-1 fw-bold">@Model.ShippingAddress</p>
+                <p class="mb-1">@Model.ShippingCity, @Model.ShippingPostalCode</p>
+                <p class="mb-1">@Model.ShippingCountry</p>
+                @if (!string.IsNullOrEmpty(Model.ShippingPhone))
+                {
+                    <p class="mb-1">Phone: @Model.ShippingPhone</p>
+                }
+            </div>
+        </div>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th style="width: 50%;">Item Description</th>
+                    <th class="text-center">Quantity</th>
+                    <th class="text-end">Unit Price</th>
+                    <th class="text-end">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.OrderItems)
+                {
+                    <tr>
+                        <td>
+                            @if (item.Product != null)
+                            {
+                                <div class="fw-bold">@item.Product.Name</div>
+                                <small class="text-muted">@item.Product.Model</small>
+                            }
+                            else
+                            {
+                                <span>Product #@item.ProductId</span>
+                            }
+                        </td>
+                        <td class="text-center">@item.Quantity</td>
+                        <td class="text-end">RS @item.UnitPrice.ToString("N2")</td>
+                        <td class="text-end">RS @item.TotalPrice.ToString("N2")</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                    <td class="text-end">RS @Model.Subtotal.ToString("N2")</td>
+                </tr>
+                <tr>
+                    <td colspan="3" class="text-end"><strong>Tax Amount:</strong></td>
+                    <td class="text-end">RS @Model.TaxAmount.ToString("N2")</td>
+                </tr>
+                <tr>
+                    <td colspan="3" class="text-end"><strong>Shipping Cost:</strong></td>
+                    <td class="text-end">RS @Model.ShippingCost.ToString("N2")</td>
+                </tr>
+                @if (Model.DiscountAmount > 0)
+                {
+                    <tr>
+                        <td colspan="3" class="text-end text-success"><strong>Discount:</strong></td>
+                        <td class="text-end text-success">-RS @Model.DiscountAmount.ToString("N2")</td>
+                    </tr>
+                }
+                <tr class="total-row">
+                    <td colspan="3" class="text-end"><strong>Total Amount:</strong></td>
+                    <td class="text-end"><strong>RS @Model.TotalAmount.ToString("N2")</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <h6 class="text-muted text-uppercase fw-bold mb-2">Payment Information</h6>
+                <p class="mb-1"><strong>Method:</strong> @Model.PaymentMethod</p>
+                <p class="mb-1"><strong>Status:</strong> @Model.PaymentStatus</p>
+                @if (!string.IsNullOrEmpty(Model.TransactionId))
+                {
+                    <p class="mb-1"><strong>Transaction ID:</strong> @Model.TransactionId</p>
+                }
+            </div>
+        </div>
+
+        <div class="mt-5 pt-4 border-top text-center text-muted">
+            <p class="mb-0">Thank you for shopping with MobileShop!</p>
+            <p class="small">For any queries, please contact our customer support.</p>
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        window.onload = function() {
+            // Auto-print if query parameter present
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('print') === 'true') {
+                setTimeout(() => window.print(), 500);
+            }
+        };
+    </script>
+</body>
+</html>

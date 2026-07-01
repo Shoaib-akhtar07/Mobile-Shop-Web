@@ -1,0 +1,96 @@
+﻿@model List<TopProductViewModel>
+@{
+    ViewData["Title"] = "Top Selling Products";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3><i class="bi bi-trophy"></i> Top Selling Products</h3>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header"><h5 class="mb-0">Top Products Chart</h5></div>
+            <div class="card-body">
+                <canvas id="topProductsChart" height="350"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-header"><h5 class="mb-0">Rankings</h5></div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-@(i < 3 ? "warning" : "secondary") me-2">#@(i + 1)</span>
+                                <div>
+                                    <h6 class="mb-0">@Model[i].ProductName</h6>
+                                    <small class="text-muted">@Model[i].UnitsSold units sold</small>
+                                </div>
+                            </div>
+                            <span class="badge bg-success">RS @Model[i].Revenue.ToString("N0")</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mt-4">
+    <div class="card-header"><h5 class="mb-0">Detailed Data</h5></div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead><tr><th>Rank</th><th>Product</th><th>Units Sold</th><th>Revenue</th></tr></thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        <tr>
+                            <td><span class="badge bg-@(i < 3 ? "warning text-dark" : "secondary")">#@(i + 1)</span></td>
+                            <td>@Model[i].ProductName</td>
+                            <td>@Model[i].UnitsSold</td>
+                            <td>RS @Model[i].Revenue.ToString("N0")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div configurations>
+
+@section Scripts {
+    <script>
+        var ctx = document.getElementById('topProductsChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.Select(p => $"'{p.ProductName}'")))],
+                datasets: [{
+                    label: 'Units Sold',
+                    data: [@string.Join(",", Model.Select(p => p.UnitsSold))],
+                    backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                    borderColor: 'rgba(46, 204, 113, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Revenue (RS thousands)',
+                    data: [@string.Join(",", Model.Select(p => (p.Revenue / 1000).ToString("F0")))],
+                    backgroundColor: 'rgba(155, 89, 182, 0.5)',
+                    borderColor: 'rgba(155, 89, 182, 1)',
+                    borderWidth: 1,
+                    yAxisID: 'y1'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true, position: 'left' },
+                    y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false } }
+                }
+            }
+        });
+    </script>
+}

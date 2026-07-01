@@ -1,0 +1,126 @@
+﻿@model Order
+@{
+    ViewData["Title"] = $"Order {Model.OrderNumber}";
+}
+<div class="container py-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="card shadow-sm mb-4">
+                <div class="list-group list-group-flush">
+                    <a asp-action="Profile" class="list-group-item list-group-item-action">
+                        <i class="bi bi-person"></i> Profile
+                    </a>
+                    <a asp-action="Orders" class="list-group-item list-group-item-action active">
+                        <i class="bi bi-bag"></i> My Orders
+                    </a>
+                    <a asp-action="Wishlist" class="list-group-item list-group-item-action">
+                        <i class="bi bi-heart"></i> Wishlist
+                    </a>
+                    <a asp-action="ChangePassword" class="list-group-item list-group-item-action">
+                        <i class="bi bi-key"></i> Change Password
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-receipt"></i> Order @Model.OrderNumber</h5>
+                    <a asp-action="Orders" class="btn btn-light btn-sm"><i class="bi bi-arrow-left"></i> Back to Orders</a>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Order Information</h6>
+                            <p class="mb-1"><strong>Order Number:</strong> @Model.OrderNumber</p>
+                            <p class="mb-1"><strong>Order Date:</strong> @Model.OrderDate.ToString("MMM dd, yyyy HH:mm")</p>
+                            <p class="mb-1"><strong>Status:</strong> 
+                                <span class="badge @(Model.Status switch {
+                                    OrderStatus.Pending => "bg-warning",
+                                    OrderStatus.Processing => "bg-info",
+                                    OrderStatus.Shipped => "bg-primary",
+                                    OrderStatus.Delivered => "bg-success",
+                                    OrderStatus.Cancelled => "bg-danger",
+                                    _ => "bg-secondary"
+                                })">@Model.Status</span>
+                            </p>
+                            <p class="mb-0"><strong>Payment Method:</strong> @Model.PaymentMethod</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Shipping Address</h6>
+                            <p class="mb-1">@Model.ShippingAddress</p>
+                            <p class="mb-1">@Model.ShippingCity, @Model.ShippingPostalCode</p>
+                            <p class="mb-0">@Model.ShippingCountry</p>
+                            @if (!string.IsNullOrEmpty(Model.ShippingPhone))
+                            {
+                                <p class="mb-0"><strong>Phone:</strong> @Model.ShippingPhone</p>
+                            }
+                        </div>
+                    </div>
+
+                    <h6>Order Items</h6>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-center">Quantity</th>
+                                    <th class="text-end">Price</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderItems)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="@(item.Product?.MainImageUrl ?? "https://via.placeholder.com/50x50?text=No+Image")" 
+                                                     class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;" />
+                                                <div>
+                                                    <h6 class="mb-0">@item.Product?.Name</h6>
+                                                    <small class="text-muted">@item.Product?.Model</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">@item.Quantity</td>
+                                        <td class="text-end">RS @item.UnitPrice.ToString("N0")</td>
+                                        <td class="text-end">RS @item.TotalPrice.ToString("N0")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                                    <td class="text-end">RS @Model.Subtotal.ToString("N0")</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Tax:</strong></td>
+                                    <td class="text-end">RS @Model.TaxAmount.ToString("N0")</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Shipping:</strong></td>
+                                    <td class="text-end">RS @Model.ShippingCost.ToString("N0")</td>
+                                </tr>
+                                <tr class="table-primary">
+                                    <td colspan="3" class="text-end"><h5 class="mb-0">Total:</h5></td>
+                                    <td class="text-end"><h5 class="mb-0">RS @Model.TotalAmount.ToString("N0")</h5></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <div class="alert alert-info mt-3">
+                            <strong>Order Notes:</strong> @Model.Notes
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

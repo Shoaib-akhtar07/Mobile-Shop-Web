@@ -1,0 +1,80 @@
+﻿@using MobileShop.Controllers
+@using static MobileShop.Controllers.HomeController
+@model HomeViewModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<!-- Featured Products Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Featured Products</h2>
+            <a class="btn btn-outline-primary">View All <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="row g-4">
+            @foreach (var product in Model.FeaturedProducts)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <partial name="_ProductCard" model="product" />
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- New Arrivals Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>New Arrivals</h2>
+            <a class="btn btn-outline-primary">View All <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="row g-4">
+            @foreach (var product in Model.NewArrivals.Take(4))
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <partial name="_ProductCard" model="product" />
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Bestsellers Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Bestsellers</h2>
+            <a class="btn btn-outline-primary">View All <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="row g-4">
+            @foreach (var product in Model.Bestsellers.Take(4))
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <partial name="_ProductCard" model="product" />
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Popular Brands Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">Popular Brands</h2>
+        <div class="row g-4 text-center">
+            @foreach (var brand in Model.Brands)
+            {
+                <div class="col-md-2 col-4">
+                    <a asp-controller="Products" asp-action="Index" asp-route-brandId="@brand.Id" class="text-decoration-none">
+                        <div class="brand-card p-4 bg-white rounded shadow-sm">
+                            <h5 class="text-dark mb-0">@brand.Name</h5>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+</section>

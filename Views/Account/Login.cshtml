@@ -1,0 +1,80 @@
+﻿@model MobileShop.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0"><i class="bi bi-person-circle"></i> Login</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Login" method="post">
+                        <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input asp-for="Email" class="form-control" placeholder="Enter your email" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                <input asp-for="Password" class="form-control" placeholder="Enter your password" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input asp-for="RememberMe" class="form-check-input" />
+                            <label asp-for="RememberMe" class="form-check-label"></label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mb-3">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </button>
+
+                        <div class="text-center">
+                            <a asp-action="ForgotPassword" class="text-decoration-none">Forgot password?</a>
+                        </div>
+                    </form>
+
+                    <hr />
+
+                    <div class="text-center mb-3">
+                        <p class="text-muted">Or login with</p>
+                        <div class="d-flex justify-content-center gap-2">
+                            <input type="hidden" name="provider" value="Google" />
+                            <button type="submit" class="btn btn-outline-danger">
+                                <i class="bi bi-google"></i> Google
+                            </button>
+                            <input type="hidden" name="provider" value="Facebook" />
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="bi bi-facebook"></i> Facebook
+                            </button>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="text-center">
+                        <p class="mb-0">Don't have an account? <a asp-action="Register" class="text-decoration-none">Register here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

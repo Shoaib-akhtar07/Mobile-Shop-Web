@@ -1,0 +1,248 @@
+﻿@model MobileShop.ViewModels.CheckoutViewModel
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<div class="container py-4">
+    <h2><i class="bi bi-credit-card"></i> Checkout</h2>
+
+    <form asp-action="Process" method="post" id="checkoutForm">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Shipping Information -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-truck"></i> Shipping Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="FirstName" class="form-label"></label>
+                                <input asp-for="FirstName" class="form-control" />
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="LastName" class="form-label"></label>
+                                <input asp-for="LastName" class="form-control" />
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Email" class="form-label"></label>
+                                <input asp-for="Email" class="form-control" type="email" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Phone" class="form-label"></label>
+                                <input asp-for="Phone" class="form-control" type="tel" />
+                                <span asp-validation-for="Phone" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label"></label>
+                            <input asp-for="Address" class="form-control" placeholder="Street address" />
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address2" class="form-label"></label>
+                            <input asp-for="Address2" class="form-control" placeholder="Apartment, suite, etc. (optional)" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="City" class="form-label"></label>
+                                <input asp-for="City" class="form-control" />
+                                <span asp-validation-for="City" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="State" class="form-label"></label>
+                                <input asp-for="State" class="form-control" />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="PostalCode" class="form-label"></label>
+                                <input asp-for="PostalCode" class="form-control" />
+                                <span asp-validation-for="PostalCode" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Country" class="form-label"></label>
+                            <input asp-for="Country" class="form-control" />
+                            <span asp-validation-for="Country" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="OrderNotes" class="form-label"></label>
+                            <textarea asp-for="OrderNotes" class="form-control" rows="3" placeholder="Special instructions for delivery..."></textarea>
+                        </div>
+
+                        @if (Model.IsAuthenticated)
+                        {
+                            <div class="form-check">
+                                <input asp-for="SaveAddress" class="form-check-input" />
+                                <label asp-for="SaveAddress" class="form-check-label"></label>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-credit-card"></i> Payment Method</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-check card p-3">
+                                    <input class="form-check-input" type="radio" asp-for="PaymentMethod" value="CreditCard" id="paymentCard" checked />
+                                    <label class="form-check-label" for="paymentCard">
+                                        <i class="bi bi-credit-card"></i> Credit/Debit Card
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check card p-3">
+                                    <input class="form-check-input" type="radio" asp-for="PaymentMethod" value="Stripe" id="paymentStripe" />
+                                    <label class="form-check-label" for="paymentStripe">
+                                        <i class="bi bi-stripe"></i> Stripe
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check card p-3">
+                                    <input class="form-check-input" type="radio" asp-for="PaymentMethod" value="PayPal" id="paymentPayPal" />
+                                    <label class="form-check-label" for="paymentPayPal">
+                                        <i class="bi bi-paypal"></i> PayPal
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check card p-3">
+                                    <input class="form-check-input" type="radio" asp-for="PaymentMethod" value="UPI" id="paymentUPI" />
+                                    <label class="form-check-label" for="paymentUPI">
+                                        <i class="bi bi-phone"></i> UPI / Net Banking
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check card p-3">
+                                    <input class="form-check-input" type="radio" asp-for="PaymentMethod" value="CashOnDelivery" id="paymentCOD" />
+                                    <label class="form-check-label" for="paymentCOD">
+                                        <i class="bi bi-cash"></i> Cash on Delivery
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stripe Card Element -->
+                        <div id="stripePayment" class="mt-3" style="display: none;">
+                            <div class="form-group">
+                                <label class="form-label">Card Details</label>
+                                <div id="cardElement" class="form-control p-3"></div>
+                                <div id="cardErrors" class="text-danger mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Order Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var item in Model.Cart.CartItems)
+                        {
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>@item.ProductName x @item.Quantity</span>
+                                <span>RS @item.TotalPrice.ToString("N0")</span>
+                            </div>
+                        }
+                        <hr />
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal</span>
+                            <span>RS @Model.Cart.CartTotal.ToString("N0")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tax (18% GST)</span>
+                            <span>RS @Model.Cart.Tax.ToString("N0")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Shipping</span>
+                            <span&gt biographical>@(Model.Cart.Shipping == 0 ? "FREE" : $"RS {Model.Cart.Shipping:N0}")</span>
+                            </div>
+                            <hr />
+                            <div class="d-flex justify-content-between mb-3">
+                                <h5 class="mb-0">Total</h5>
+                                <h5 class="mb-0 text-primary">RS @Model.Cart.GrandTotal.ToString("N0")</h5>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 btn-lg" id="submitOrder">
+                                <i class="bi bi-lock"></i> Place Order
+                            </button>
+
+                            <div class="text-center mt-3">
+                                <small class="text-muted"><i class="bi bi-shield-check"></i> Secure checkout</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+    
+        @if (!string.IsNullOrEmpty(ViewBag.StripePublishableKey))
+        {
+            <script src="https://js.stripe.com/v3/"></script>
+            <script>
+                var stripe = Stripe('@ViewBag.StripePublishableKey');
+                var elements = stripe.elements();
+                var card = elements.create('card');
+                card.mount('#cardElement');
+
+                card.on('change', function(event) {
+                var displayError = document.getElementById('cardErrors');
+                if (event.error) {
+                displayError.textContent = event.error.message;
+                } else {
+                displayError.textContent = '';
+                }
+                });
+
+                document.querySelectorAll('input[name="PaymentMethod"]').forEach(function(radio) {
+                radio.addEventListener('change', function() {
+                document.getElementById('stripePayment').style.display =
+                this.value === 'Stripe' ? 'block' : 'none';
+                });
+                });
+
+                document.getElementById('checkoutForm').addEventListener('submit', function(event) {
+                var paymentMethod = document.querySelector('input[name="PaymentMethod"]:checked').value;
+                if (paymentMethod === 'Stripe') {
+                event.preventDefault();
+                stripe.createToken(card).then(function(result) {
+                if (result.error) {
+                document.getElementById('cardErrors').textContent = result.error.message;
+                } else {
+                var hiddenInput = document.createElement('input');
+                hiddenInput.setAttribute('type', 'hidden');
+                hiddenInput.setAttribute('name', 'StripeToken');
+                hiddenInput.setAttribute('value', result.token.id);
+                document.getElementById('checkoutForm').appendChild(hiddenInput);
+                document.getElementById('checkoutForm').submit();
+                }
+                });
+                }
+                });
+            </script>
+        }
+    }

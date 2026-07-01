@@ -1,0 +1,613 @@
+﻿@model Product
+@{
+    ViewData["Title"] = "Edit Product";
+    var categories = ViewBag.Categories as List<Category> ?? new List<Category>();
+    var brands = ViewBag.Brands as List<Brand> ?? new List<Brand>();
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Edit Product</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Products</a></li>
+        <li class="breadcrumb-item active">Edit @Model.Name</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-edit me-1"></i> Edit Product #@Model.Id
+        </div>
+        <div class="card-body">
+            <!-- DEBUG: Show validation errors -->
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    <h6>Please fix the following errors:</h6>
+                    <ul>
+                        @foreach (var modelError in ViewData.ModelState.SelectMany(keyValuePair => keyValuePair.Value.Errors))
+                        {
+                            <li>@modelError.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <form asp-action="Edit" method="post" enctype="multipart/form-data" id="editProductForm">
+                <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+                <!-- Hidden fields for ID and tracking properties -->
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CreatedAt" />
+                <input type="hidden" asp-for="MainImageUrl" />
+                <!-- FIX: Ensure these don't interfere with validation -->
+                @Html.HiddenFor(m => m.Id)
+                @Html.HiddenFor(m => m.CreatedAt)
+                @Html.HiddenFor(m => m.MainImageUrl)
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <!-- Basic Information -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">Basic Information</div>
+                            <div class="card-body">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Name" class="form-label required">Product Name</label>
+                                    <input asp-for="Name" class="form-control" required />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="Model" class="form-label">Model Number</label>
+                                    <input asp-for="Model" class="form-control" />
+                                    <span asp-validation-for="Model" class="text-danger"></span>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="CategoryId" class="form-label required">Category</label>
+                                            <select asp-for="CategoryId" class="form-select" required>
+                                                <option value="">-- Select Category --</option>
+                                                @foreach (var cat in categories)
+                                                {
+                                                    <option value="@cat.Id" selected="@(Model.CategoryId == cat.Id ? "selected" : null)">@cat.Name</option>
+                                                }
+                                            </select>
+                                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="BrandId" class="form-label required">Brand</label>
+                                            <select asp-for="BrandId" class="form-select" required>
+                                                <option value="">-- Select Brand --</option>
+                                                @foreach (var brand in brands)
+                                                {
+                                                    <option value="@brand.Id" selected="@(Model.BrandId == brand.Id ? "selected" : null)">@brand.Name</option>
+                                                }
+                                            </select>
+                                            <span asp-validation-for="BrandId" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pricing -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">Pricing & Stock</div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="OriginalPrice" class="form-label required">Original Price (RS )</label>
+                                            <input asp-for="OriginalPrice" class="form-control" type="number" step="0.01" min="0.01" required />
+                                            <span asp-validation-for="OriginalPrice" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="SalePrice" class="form-label required">Sale Price (RS )</label>
+                                            <input asp-for="SalePrice" class="form-control" type="number" step="0.01" min="0.01" required />
+                                            <span asp-validation-for="SalePrice" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="StockQuantity" class="form-label required">Stock Quantity</label>
+                                            <input asp-for="StockQuantity" class="form-control" type="number" min="0" required />
+                                            <span asp-validation-for="StockQuantity" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Descriptions -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">Descriptions</div>
+                            <div class="card-body">
+                                <div class="form-group mb-3">
+                                    <label asp-for="ShortDescription" class="form-label">Short Description</label>
+                                    <textarea asp-for="ShortDescription" class="form-control" rows="2"></textarea>
+                                    <span asp-validation-for="ShortDescription" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="Description" class="form-label">Full Description</label>
+                                    <textarea asp-for="Description" class="form-control" rows="6"></textarea>
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Specifications Management - Edit Mode -->
+                        <div class="card mb-3 border-success">
+                            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-list me-2"></i>Specifications</span>
+                                <span class="badge bg-light text-success" id="specCountBadge">
+                                    @(Model.Specifications?.Count() ?? 0) specs
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <!-- Add New Spec Form -->
+                                <div class="row g-2 mb-3">
+                                    <div class="col-md-3">
+                                        <input type="text" id="newSpecGroup" class="form-control form-control-sm"
+                                               placeholder="Group" list="groupSuggestions" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" id="newSpecName" class="form-control form-control-sm"
+                                               placeholder="Name" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" id="newSpecValue" class="form-control form-control-sm"
+                                               placeholder="Value" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="button" class="btn btn-success btn-sm w-100" onclick="addSpecification(@Model.Id)">
+                                            <i class="fas fa-plus me-1"></i>Add
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <datalist id="groupSuggestions">
+                                    <option value="General" />
+                                    <option value="Display" />
+                                    <option value="Camera" />
+                                    <option value="Battery" />
+                                    <option value="Performance" />
+                                    <option value="Storage" />
+                                    <option value="Connectivity" />
+                                    <option value="Design" />
+                                    <option value="Audio" />
+                                </datalist>
+
+                                <!-- Quick Add -->
+                                <div class="mb-3">
+                                    <small class="text-muted">Quick Add:</small>
+                                    <div class="d-flex flex-wrap gap-1 mt-1">
+                                        <button type="button" class="btn btn-xs btn-outline-secondary btn-sm" onclick="quickAddSpec(@Model.Id, 'RAM', '6GB', 'Performance')">RAM 6GB</button>
+                                        <button type="button" class="btn btn-xs btn-outline-secondary btn-sm" onclick="quickAddSpec(@Model.Id, 'Storage', '128GB', 'Storage')">128GB</button>
+                                        <button type="button" class="btn btn-xs btn-outline-secondary btn-sm" onclick="quickAddSpec(@Model.Id, 'Battery', '5000 mAh', 'Battery')">5000mAh</button>
+                                        <button type="button" class="btn btn-xs btn-outline-secondary btn-sm" onclick="quickAddSpec(@Model.Id, 'Screen Size', '6.5 inches', 'Display')">6.5"</button>
+                                        <button type="button" class="btn btn-xs btn-outline-secondary btn-sm" onclick="quickAddSpec(@Model.Id, 'Processor', 'Snapdragon 888', 'Performance')">SD 888</button>
+                                        <button type="button" class="btn btn-xs btn-outline-secondary btn-sm" onclick="quickAddSpec(@Model.Id, 'Main Camera', '108 MP', 'Camera')">108MP</button>
+                                        <button type="button" class="btn btn-xs btn-outline-secondary btn-sm" onclick="quickAddSpec(@Model.Id, 'Front Camera', '32 MP', 'Camera')">32MP Selfie</button>
+                                    </div>
+                                </div>
+
+                                <!-- Existing Specs Table -->
+                                <div class="table-responsive" id="specsContainer">
+                                    @if (Model.Specifications?.Any() != true)
+                                    {
+                                        <div class="text-center text-muted py-4" id="noSpecsMessage">
+                                            <i class="fas fa-clipboard-list fa-2x mb-2"></i>
+                                            <p class="mb-0">No specifications yet. Add them above.</p>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <table class="table table-sm table-hover" id="specsTable">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th style="width: 20%;">Group</th>
+                                                    <th style="width: 25%;">Name</th>
+                                                    <th style="width: 40%;">Value</th>
+                                                    <th style="width: 15%;">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="specsTableBody">
+                                                @foreach (var spec in Model.Specifications!.OrderBy(s => s.GroupName ?? "General").ThenBy(s => s.DisplayOrder))
+                                                {
+                                                    <tr id="spec-row-@spec.Id" data-spec-id="@spec.Id">
+                                                        <td class="text-muted small">@(spec.GroupName ?? "General")</td>
+                                                        <td class="fw-bold">@spec.Name</td>
+                                                        <td>@spec.Value</td>
+                                                        <td>
+                                                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                                                    onclick="deleteSpecification(@spec.Id)">
+                                                                <i class="fas fa-trash-alt bi bi-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <!-- Product Status -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">Product Status</div>
+                            <div class="card-body">
+                                <div class="form-check mb-2">
+                                    <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                    <label asp-for="IsActive" class="form-check-label">Active</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input asp-for="IsFeatured" class="form-check-input" type="checkbox" />
+                                    <label asp-for="IsFeatured" class="form-check-label">Featured Product</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input asp-for="IsNewArrival" class="form-check-input" type="checkbox" />
+                                    <label asp-for="IsNewArrival" class="form-check-label">New Arrival</label>
+                                </div>
+                                <div class="form-check">
+                                    <input asp-for="IsBestseller" class="form-check-input" type="checkbox" />
+                                    <label asp-for="IsBestseller" class="form-check-label">Bestseller</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Current Images -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">Current Images</div>
+                            <div class="card-body">
+                                @if (!string.IsNullOrEmpty(Model.MainImageUrl))
+                                {
+                                    <div class="mb-3">
+                                        <label class="d-block text-muted small mb-1">Main Image</label>
+                                        <img src="@Model.MainImageUrl" class="img-thumbnail w-100 mb-2" style="max-height: 150px; object-fit: contain;" />
+                                        <div class="form-check">
+                                            <input type="checkbox" name="deleteMainImage" value="true" class="form-check-input" id="deleteMainImage" />
+                                            <label class="form-check-label text-danger small" for="deleteMainImage">Remove main image</label>
+                                        </div>
+                                    </div>
+                                }
+
+                                @if (Model.ProductImages != null && Model.ProductImages.Any())
+                                {
+                                    <label class="d-block text-muted small mb-2">Additional Images</label>
+                                    <div class="row g-2 mb-3">
+                                        @foreach (var img in Model.ProductImages.OrderBy(i => i.DisplayOrder))
+                                        {
+                                            <div class="col-6 position-relative">
+                                                <img src="@img.ImageUrl" class="img-thumbnail w-100" style="height: 100px; object-fit: cover;" />
+                                                <div class="form-check mt-1">
+                                                    <input type="checkbox" name="deleteImageIds" value="@img.Id" class="form-check-input" id="deleteImg_@img.Id" />
+                                                    <label class="form-check-label text-danger small" for="deleteImg_@img.Id">Remove</label>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Upload New Images -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">Upload New Images</div>
+                            <div class="card-body">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Replace Main Image</label>
+                                    <input type="file" name="images" class="form-control" accept="image/*"
+                                           onchange="previewImage(this, 'newMainPreview')" />
+                                    <div id="newMainPreview" class="mt-2 d-none">
+                                        <img src="" class="img-thumbnail w-100" style="max-height: 150px;" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Add More Images</label>
+                                    <input type="file" name="images" class="form-control" accept="image/*" multiple
+                                           onchange="previewMultipleImages(this, 'newAdditionalPreview')" />
+                                    <div id="newAdditionalPreview" class="row mt-2 g-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info btn-lg">
+                        <i class="fas fa-eye"></i> View Details
+                    </a>
+                    <a asp-action="Index" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Image Preview Functions
+    function previewImage(input, previewId) {
+        const preview = document.getElementById(previewId);
+        const img = preview.querySelector('img');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+                preview.classList.remove('d-none');
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function previewMultipleImages(input, previewId) {
+        const preview = document.getElementById(previewId);
+        preview.innerHTML = '';
+
+        if (input.files) {
+            Array.from(input.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.className = 'col-6';
+                    div.innerHTML = `<img src="${e.target.result}" class="img-thumbnail w-100" style="height: 80px; object-fit: cover;" />`;
+                    preview.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+    }
+
+    // Specification Management for Edit Mode
+    async function addSpecification(productId) {
+        const groupInput = document.getElementById('newSpecGroup');
+        const nameInput = document.getElementById('newSpecName');
+        const valueInput = document.getElementById('newSpecValue');
+
+        const groupName = groupInput.value.trim() || null;
+        const name = nameInput.value.trim();
+        const value = valueInput.value.trim();
+
+        if (!name || !value) {
+            alert('Please enter both name and value!');
+            return;
+        }
+
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Adding...';
+
+        try {
+            const url = new URL('@Url.Action("AddSpecification", "Products")', window.location.origin);
+            url.searchParams.append('productId', productId);
+            url.searchParams.append('name', name);
+            url.searchParams.append('value', value);
+            if (groupName) url.searchParams.append('groupName', groupName);
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Add to table
+                addSpecToTable(result.id, groupName || 'General', name, value);
+
+                // Clear inputs
+                nameInput.value = '';
+                valueInput.value = '';
+                nameInput.focus();
+
+                toastr.success('Specification added successfully!');
+                updateSpecCount(1);
+            } else {
+                toastr.error('Failed to add specification');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            toastr.error('An error occurred');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-plus me-1"></i>Add';
+        }
+    }
+
+    function quickAddSpec(productId, name, value, group) {
+        document.getElementById('newSpecGroup').value = group;
+        document.getElementById('newSpecName').value = name;
+        document.getElementById('newSpecValue').value = value;
+        addSpecification(productId);
+    }
+
+    function addSpecToTable(id, group, name, value) {
+        let tbody = document.getElementById('specsTableBody');
+        const noSpecs = document.getElementById('noSpecsMessage');
+
+        // Remove "no specs" message if exists
+        if (noSpecs) {
+            noSpecs.remove();
+
+            // Create table if doesn't exist
+            if (!tbody) {
+                const container = document.getElementById('specsContainer');
+                container.innerHTML = `
+                    <table class="table table-sm table-hover" id="specsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 20%;">Group</th>
+                                <th style="width: 25%;">Name</th>
+                                <th style="width: 40%;">Value</th>
+                                <th style="width: 15%;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="specsTableBody"></tbody>
+                    </table>
+                `;
+                tbody = document.getElementById('specsTableBody');
+            }
+        }
+
+        // Check if group header exists
+        const existingGroupHeader = Array.from(tbody.querySelectorAll('tr.table-light')).find(
+            tr => tr.textContent.trim() === group
+        );
+
+        // Create row
+        const row = document.createElement('tr');
+        row.id = `spec-row-${id}`;
+        row.dataset.specId = id;
+        row.innerHTML = `
+            <td class="text-muted small">${group}</td>
+            <td class="fw-bold">${name}</td>
+            <td>${value}</td>
+            <td>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteSpecification(${id})">
+                    <i class="fas fa-times bi bi-trash"></i>
+                </button>
+            </td>
+        `;
+
+        // Insert in correct group position
+        if (existingGroupHeader) {
+            // Insert after last item in this group
+            let inserted = false;
+            let currentRow = existingGroupHeader;
+            while (currentRow.nextElementSibling && !currentRow.nextElementSibling.classList.contains('table-light')) {
+                currentRow = currentRow.nextElementSibling;
+            }
+            currentRow.after(row);
+            inserted = true;
+        } else {
+            // Add new group header and row
+            const groupHeader = document.createElement('tr');
+            groupHeader.className = 'table-light';
+            groupHeader.innerHTML = `<td colspan="4" class="fw-bold text-uppercase small text-muted py-1">${group}</td>`;
+
+            // Find position to insert (alphabetical)
+            const groups = Array.from(tbody.querySelectorAll('tr.table-light')).map(tr => tr.textContent.trim());
+            groups.push(group);
+            groups.sort();
+            const insertIndex = groups.indexOf(group);
+
+            if (insertIndex === 0) {
+                tbody.prepend(groupHeader);
+                groupHeader.after(row);
+            } else {
+                const prevGroup = groups[insertIndex - 1];
+                const prevHeader = Array.from(tbody.querySelectorAll('tr.table-light')).find(tr => tr.textContent.trim() === prevGroup);
+                let currentRow = prevHeader;
+                while (currentRow.nextElementSibling && !currentRow.nextElementSibling.classList.contains('table-light')) {
+                    currentRow = currentRow.nextElementSibling;
+                }
+                currentRow.after(groupHeader);
+                groupHeader.after(row);
+            }
+        }
+    }
+
+    async function deleteSpecification(specId) {
+        if (!confirm('Are you sure you want to remove this specification?')) return;
+
+        const row = document.getElementById(`spec-row-${specId}`);
+        if (row) {
+            row.style.opacity = '0.5';
+        }
+
+        try {
+            const response = await fetch(`/Admin/Products/RemoveSpecification/${specId}`, {
+                method: 'POST',
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                if (row) {
+                    const groupHeader = row.previousElementSibling?.classList.contains('table-light') ? row.previousElementSibling : null;
+                    row.remove();
+
+                    // Check if group is now empty
+                    if (groupHeader) {
+                        const nextRow = groupHeader.nextElementSibling;
+                        if (!nextRow || nextRow.classList.contains('table-light')) {
+                            groupHeader.remove();
+                        }
+                    }
+
+                    // Check if table is empty
+                    const tbody = document.getElementById('specsTableBody');
+                    if (tbody && tbody.children.length === 0) {
+                        document.getElementById('specsContainer').innerHTML = `
+                            <div class="text-center text-muted py-4" id="noSpecsMessage">
+                                <i class="fas fa-clipboard-list fa-2x mb-2"></i>
+                                <p class="mb-0">No specifications yet. Add them above.</p>
+                            </div>
+                        `;
+                    }
+                }
+                toastr.success('Specification removed successfully!');
+                updateSpecCount(-1);
+            } else {
+                if (row) row.style.opacity = '1';
+                toastr.error('Failed to remove specification');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            if (row) row.style.opacity = '1';
+            toastr.error('An error occurred');
+        }
+    }
+
+    function updateSpecCount(change) {
+        const badge = document.getElementById('specCountBadge');
+        const currentText = badge.textContent;
+        const currentCount = parseInt(currentText) || 0;
+        const newCount = currentCount + change;
+        badge.textContent = `${newCount} spec${newCount !== 1 ? 's' : ''}`;
+    }
+
+    // Form Validation
+    document.getElementById('editProductForm').addEventListener('submit', function(e) {
+        const originalPrice = parseFloat(document.querySelector('[name="OriginalPrice"]').value) || 0;
+        const salePrice = parseFloat(document.querySelector('[name="SalePrice"]').value) || 0;
+        const categoryId = document.querySelector('[name="CategoryId"]').value;
+        const brandId = document.querySelector('[name="BrandId"]').value;
+
+        if (!categoryId) {
+            e.preventDefault();
+            alert('Please select a Category!');
+            return false;
+        }
+
+        if (!brandId) {
+            e.preventDefault();
+            alert('Please select a Brand!');
+            return false;
+        }
+
+        if (salePrice > originalPrice) {
+            e.preventDefault();
+            alert('Sale price cannot be greater than original price!');
+            return false;
+        }
+    });
+</script>

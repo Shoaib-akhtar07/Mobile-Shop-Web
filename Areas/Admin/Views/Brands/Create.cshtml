@@ -1,0 +1,55 @@
+﻿@model MobileShop.Models.Brand
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Brand</h4>
+<hr />
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            
+            <div class="mb-3">
+                <label asp-for="BrandLogo" class="form-label"></label>
+                <input asp-for="BrandLogo" class="form-control" type="file" accept="image/*" />
+                <small class="text-muted">Upload a Brand picture (optional)</small>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Country" class="control-label"></label>
+                <input asp-for="Country" class="form-control" />
+                <span asp-validation-for="Country" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="WebsiteUrl" class="control-label"></label>
+                <input asp-for="WebsiteUrl" class="form-control" />
+                <span asp-validation-for="WebsiteUrl" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
+                </label>
+            </div>
+           
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check"></i> Create</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

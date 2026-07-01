@@ -1,0 +1,27 @@
+﻿@model IEnumerable<MobileShop.Models.Brand>
+
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+        Brands
+    </a>
+    <ul class="dropdown-menu shadow">
+        @foreach (var brand in Model)
+        {
+            <li>
+                <a class="dropdown-item"
+                       asp-controller="Products"
+                       asp-action="Index"
+                       asp-route-brandId="@brand.Id">
+                    @brand.Name.ToUpper()
+                </a>
+            </li>
+        }
+
+        <li><hr class="dropdown-divider"></li>
+        <li>
+            <a class="dropdown-item fw-bold text-primary" asp-controller="Products" asp-action="Index">
+                View All
+            </a>
+        </li>
+    </ul>
+</li>

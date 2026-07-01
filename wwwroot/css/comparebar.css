@@ -1,0 +1,73 @@
+﻿.compare-sidebar {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    width: 290px;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    z-index: 9999;
+    display: none;
+    border: 1px solid #f1f1f1;
+    animation: slideUp 0.3s ease;
+}
+
+.compare-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 15px;
+}
+
+    .compare-header h6 {
+        font-size: 16px;
+        color: #212529;
+    }
+
+    .compare-header small {
+        font-size: 13px;
+    }
+
+.compare-close {
+    border: none;
+    background: #f8f9fa;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+    .compare-close:hover {
+        background: #dc3545;
+        color: white;
+    }
+
+.compare-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.compare-btn {
+    flex: 1;
+    border-radius: 12px;
+    font-weight: 600;
+    padding: 10px;
+}
+
+.clear-btn {
+    width: 50px;
+    border-radius: 12px;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

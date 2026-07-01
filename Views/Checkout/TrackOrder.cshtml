@@ -1,0 +1,478 @@
+﻿@model Order
+@{
+    ViewData["Title"] = "Track Order";
+
+    var statusSteps = new List<(OrderStatus Status, string Icon, string Label, string Description)>
+    {
+        (OrderStatus.Pending, "bi-clock", "Order Placed", "Your order has been received"),
+        (OrderStatus.Processing, "bi-gear", "Processing", "We are preparing your items"),
+        (OrderStatus.Shipped, "bi-truck", "Shipped", "Your order is on the way"),
+        (OrderStatus.Delivered, "bi-box-seam", "Delivered", "Package has arrived")
+    };
+
+    int currentStepIndex = -1;
+    bool isTerminalException = false;
+
+    if (Model != null)
+    {
+        if (Model.Status == OrderStatus.Cancelled || Model.Status == OrderStatus.Refunded)
+        {
+            isTerminalException = true;
+        }
+        else
+        {
+            currentStepIndex = statusSteps.FindIndex(s => s.Status == Model.Status);
+        }
+    }
+}
+
+@section Styles {
+    <style>
+        .tracking-timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+            .tracking-timeline::before {
+                content: '';
+                position: absolute;
+                top: 3.5rem;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: #e9ecef;
+                z-index: 0;
+            }
+
+        .timeline-step {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .timeline-icon {
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 0.75rem;
+            background: #fff;
+            border: 3px solid #dee2e6;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-step.completed .timeline-icon {
+            background: #0d6efd;
+            border-color: #0d6efd;
+            color: #fff;
+        }
+
+        .timeline-step.active .timeline-icon {
+            background: #fff;
+            border-color: #0d6efd;
+            color: #0d6efd;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
+            animation: pulse 2s infinite;
+        }
+
+        .timeline-label {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #6c757d;
+        }
+
+        .timeline-desc {
+            font-size: 0.8rem;
+            color: #adb5bd;
+        }
+
+        .timeline-step.completed .timeline-label,
+        .timeline-step.active .timeline-label {
+            color: #212529;
+        }
+
+        .timeline-date {
+            font-size: 0.75rem;
+            color: #0d6efd;
+            font-weight: 500;
+            margin-top: 0.25rem;
+        }
+
+        @@keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(13, 110, 253, 0.08);
+            }
+
+            100% {
+                box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
+            }
+        }
+
+        .status-exception {
+            border-left: 5px solid #dc3545;
+        }
+
+        .status-refunded {
+            border-left: 5px solid #6c757d;
+        }
+
+        .product-img-thumb {
+            width: 48px;
+            height: 48px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .order-meta-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1.25rem;
+            height: 100%;
+        }
+
+        .grand-total-row {
+            background: #e7f1ff;
+            font-weight: 700;
+        }
+    </style>
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <!-- Search Form -->
+            <div class="text-center mb-5">
+                <h2 class="fw-bold mb-2">Track Your Order</h2>
+                <p class="text-muted">Enter your order number to see live status updates</p>
+            </div>
+            
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                    <i class="bi bi-exclamation-circle-fill me-2"></i>@TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <form asp-action="TrackOrder" method="get">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="bi bi-search text-muted"></i>
+                            </span>
+                            <input type="text" name="orderNumber" class="form-control border-start-0 bg-light"
+                                   placeholder="Enter Order Number (e.g., ORD-20240115-ABC12345)"
+                                   value="@Context.Request.Query["orderNumber"]" required />
+                            <button class="btn btn-primary px-4 fw-semibold" type="submit">
+                                Track Order
+                            </button>
+                        </div>
+                        <div class="form-text mt-2 ms-1">
+                            <i class="bi bi-info-circle me-1"></i>You can find your order number in the confirmation email.
+                        </div>
+                    </form>
+                </div>
+            </div leak-fix>
+             @if (Model != null)
+            {
+                <!-- Order Header -->
+                <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
+                    <div>
+                        <h4 class="fw-bold mb-1">Order #@Model.OrderNumber</h4>
+                        <p class="text-muted mb-0">
+                            <i class="bi bi-calendar3 me-1"></i>
+                            Placed on @Model.OrderDate.ToString("MMM dd, yyyy")
+                        </p>
+                    </div>
+                    <div>
+                        @if (Model.Status == OrderStatus.Cancelled)
+                        {
+                            <span class="badge bg-danger fs-6 px-3 py-2 rounded-pill">
+                                <i class="bi bi-x-circle me-1"></i> Cancelled
+                            </span>
+                        }
+                        else if (Model.Status == OrderStatus.Refunded)
+                        {
+                            <span class="badge bg-secondary fs-6 px-3 py-2 rounded-pill">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i> Refunded
+                            </span>
+                        }
+                        else if (Model.Status == OrderStatus.Delivered)
+                        {
+                            <span class="badge bg-success fs-6 px-3 py-2 rounded-pill">
+                                <i class="bi bi-check-circle me-1"></i> Delivered
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill">
+                                <i class="bi bi-truck me-1"></i> @Model.Status
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Timeline -->
+                @if (isTerminalException)
+                {
+                    <div class="card border-0 shadow-sm rounded-4 mb-4 @(Model.Status == OrderStatus.Refunded ? "status-refunded" : "status-exception")">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start">
+                                <div class="fs-1 me-3 @(Model.Status == OrderStatus.Refunded ? "text-secondary" : "text-danger")">
+                                    <i class="bi @(Model.Status == OrderStatus.Refunded ? "bi-arrow-counterclockwise" : "bi-x-octagon")"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-1">
+                                        @(Model.Status == OrderStatus.Refunded ? "Order Refunded" : "Order Cancelled")
+                                    </h5>
+                                    <p class="text-muted mb-2">
+                                        @if (Model.Status == OrderStatus.Refunded)
+                                        {
+                                            <span>This order has been refunded. The refund will be processed to your original payment method within 5-7 business days.</span>
+                                        }
+                                        else
+                                        {
+                                            <span>This order was cancelled. If you have already paid, a refund will be initiated shortly.</span>
+                                        }
+                                    </p>
+                                    @if (Model.PaymentStatus == PaymentStatus.Refunded)
+                                    {
+                                        <span class="badge bg-dark">
+                                            <i class="bi bi-check2 me-1"></i> Payment Refunded
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                        <div class="card-body p-4">
+                            <div class="tracking-timeline">
+                                <div class="row g-0">
+                                    @for (int i = 0; i < statusSteps.Count; i++)
+                                    {
+                                        var step = statusSteps[i];
+                                        bool isCompleted = i < currentStepIndex;
+                                        bool isActive = i == currentStepIndex;
+
+                                        <div class="col timeline-step @(isCompleted ? "completed" : "") @(isActive ? "active" : "")">
+                                            <div class="timeline-icon">
+                                                <i class="bi @step.Icon"></i>
+                                            </div>
+                                            <div class="timeline-label">@step.Label</div>
+                                            <div class="timeline-desc">@step.Description</div>
+                                            <div class="timeline-date">
+                                                @if (step.Status == OrderStatus.Pending)
+                                                {
+                                                    @Model.OrderDate.ToString("MMM dd")
+                                                }
+                                                else if (step.Status == OrderStatus.Shipped && Model.ShippedDate.HasValue)
+                                                {
+                                                    @Model.ShippedDate.Value.ToString("MMM dd")
+                                                }
+                                                else if (step.Status == OrderStatus.Delivered && Model.DeliveredDate.HasValue)
+                                                {
+                                                    @Model.DeliveredDate.Value.ToString("MMM dd")
+                                                }
+                                                else
+                                                {
+                                                    <span>&nbsp;</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="row g-4 mb-4">
+                    <!-- Shipping Info -->
+                    <div class="col-md-6">
+                        <div class="order-meta-card">
+                            <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                                <i class="bi bi-geo-alt me-1"></i> Shipping Address
+                            </h6>
+                            <p class="mb-1 fw-semibold">@Model.ShippingAddress</p>
+                            <p class="mb-1">@Model.ShippingCity, @Model.ShippingPostalCode</p>
+                            <p class="mb-2">@Model.ShippingCountry</p>
+                            @if (!string.IsNullOrEmpty(Model.ShippingPhone))
+                            {
+                                <p class="mb-0 text-muted">
+                                    <i class="bi bi-telephone me-1"></i>@Model.ShippingPhone
+                                </p>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Payment Info -->
+                    <div class="col-md-6">
+                        <div class="order-meta-card">
+                            <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                                <i class="bi bi-credit-card me-1"></i> Payment Details
+                            </h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Method</span>
+                                <span class="fw-medium">@Model.PaymentMethod</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Status</span>
+                                <span class="badge @(Model.PaymentStatus == PaymentStatus.Paid ? "bg-success-subtle text-success" : "bg-warning-subtle text-warning")">
+                                    @Model.PaymentStatus
+                                </span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.TransactionId))
+                            {
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Transaction ID</span>
+                                    <span class="font-monospace text-muted">@Model.TransactionId</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Notes))
+                {
+                    <div class="alert alert-info border-0 rounded-3 mb-4">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Order Notes:</strong> @Model.Notes
+                    </div>
+                }
+
+                <!-- Order Items -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-header bg-white border-bottom py-3 px-4">
+                        <h6 class="fw-bold mb-0">
+                            <i class="bi bi-bag me-2"></i>Order Items (@Model.OrderItems.Count)
+                        </h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4">Product</th>
+                                        <th class="text-center">Qty</th>
+                                        <th class="text-end">Unit Price</th>
+                                        <th class="text-end pe-4">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.OrderItems)
+                                    {
+                                        <tr>
+                                            <td class="ps-4">
+                                                @if (item.Product != null)
+                                                {
+                                                    <div class="d-flex align-items-center">
+                                                        @if (!string.IsNullOrEmpty(item.Product.MainImageUrl))
+                                                        {
+                                                            <img src="@item.Product.MainImageUrl" alt="@item.Product.Name"
+                                                                 class="product-img-thumb me-3" />
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="product-img-thumb me-3 bg-light d-flex align-items-center justify-content-center">
+                                                                <i class="bi bi-phone text-muted"></i>
+                                                            </div>
+                                                        }
+                                                        <div>
+                                                            <div class="fw-semibold">@item.Product.Name</div>
+                                                            @if (!string.IsNullOrEmpty(item.Product.Model))
+                                                            {
+                                                                <small class="text-muted">@item.Product.Model</small>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Product #@item.ProductId</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-light text-dark border">@item.Quantity</span>
+                                            </td>
+                                            <td class="text-end">Rs @item.UnitPrice.ToString("N2")</td>
+                                            <td class="text-end pe-4 fw-semibold">Rs @item.TotalPrice.ToString("N2")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot class="bg-light">
+                                    <tr>
+                                        <td colspan="3" class="text-end pe-3">Subtotal</td>
+                                        <td class="text-end pe-4">Rs @Model.Subtotal.ToString("N2")</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end pe-3">Tax</td>
+                                        <td class="text-end pe-4">Rs @Model.TaxAmount.ToString("N2")</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end pe-3">Shipping</td>
+                                        <td class="text-end pe-4">Rs @Model.ShippingCost.ToString("N2")</td>
+                                    </tr>
+                                    @if (Model.DiscountAmount > 0)
+                                    {
+                                        <tr class="text-success">
+                                            <td colspan="3" class="text-end pe-3">Discount</td>
+                                            <td class="text-end pe-4">-Rs @Model.DiscountAmount.ToString("N2")</td>
+                                        </tr>
+                                    }
+                                    <tr class="grand-total-row">
+                                        <td colspan="3" class="text-end pe-3">Total Amount</td>
+                                        <td class="text-end pe-4 fs-5">Rs @Model.TotalAmount.ToString("N2")</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delivery Dates -->
+                @if (Model.ShippedDate.HasValue || Model.DeliveredDate.HasValue)
+                {
+                    <div class="row g-3 mb-5">
+                        @if (Model.ShippedDate.HasValue)
+                        {
+                            <div class="col-md-6">
+                                <div class="card border-success border-0 border-start border-4 rounded-3">
+                                    <div class="card-body">
+                                        <h6 class="text-success mb-1">
+                                            <i class="bi bi-truck me-2"></i>Shipped
+                                        </h6>
+                                        <p class="mb-0 text-muted">@Model.ShippedDate.Value.ToString("dddd, MMM dd, yyyy")</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        @if (Model.DeliveredDate.HasValue)
+                        {
+                            <div class="col-md-6">
+                                <div class="card border-success border-0 border-start border-4 rounded-3">
+                                    <div class="card-body">
+                                        <h6 class="text-success mb-1">
+                                            <i class="bi bi-box-seam me-2"></i>Delivered
+                                        </h6>
+                                        <p class="mb-0 text-muted">@Model.DeliveredDate.Value.ToString("dddd, MMM dd, yyyy")</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+</div>

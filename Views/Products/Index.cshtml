@@ -1,0 +1,129 @@
+﻿@using MobileShop.ViewModels
+@model ProductListViewModel
+@{
+    ViewData["Title"] = "Products";
+}
+
+<div class="container py-4">
+    <div class="row">
+        <!-- Sidebar Filters -->
+        <div class="col-lg-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-funnel"></i> Filters</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" asp-action="Index">
+                        <!-- Search -->
+                        <div class="mb-3">
+                            <label class="form-label">Search</label>
+                            <input type="text" name="search" class="form-control" value="@Model.SearchTerm" placeholder="Search products..." />
+                        </div>
+
+                        <!-- Categories -->
+                        <div class="mb-3">
+                            <label class="form-label">Category</label>
+                            <select name="categoryId" class="form-select">
+                                <option value="">All Categories</option>
+                                @foreach (var category in Model.Categories)
+                                {
+                                    <option value="@category.Id" selected="@(Model.SelectedCategoryId == category.Id ? "selected" : null)">@category.Name</option>
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Brands -->
+                        <div class="mb-3">
+                            <label class="form-label">Brand</label>
+                            <select name="brandId" class="form-select">
+                                <option value="">All Brands</option>
+                                @foreach (var brand in Model.Brands)
+                                {
+                                    <option value="@brand.Id" selected="@(Model.SelectedBrandId == brand.Id ? "selected" : null)">@brand.Name</option>
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Price Range -->
+                        <div class="mb-3">
+                            <label class="form-label">Price Range</label>
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">RS </span>
+                                <input type="number" name="minPrice" class="form-control" value="@Model.MinPrice" placeholder="Min" />
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text">RS </span>
+                                <input type="number" name="maxPrice" class="form-control" value="@Model.MaxPrice" placeholder="Max" />
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary w-100 mt-2">Clear Filters</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Grid -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4>@Model.TotalCount Products Found</h4>
+                <div class="d-flex align-items-center">
+                    <label class="me-2">Sort by:</label>
+                    <select class="form-select form-select-sm" style="width: 150px;" onchange="window.location.href=this.value">
+                        <option value="@Url.Action("Index", new { sort = "newest", categoryId = Model.SelectedCategoryId, brandId = Model.SelectedBrandId, search = Model.SearchTerm, minPrice = Model.MinPrice, maxPrice = Model.MaxPrice })" selected="@(Model.SortOrder == "newest" ? "selected" : null)">Newest</option>
+                        <option value="@Url.Action("Index", new { sort = "price_asc", categoryId = Model.SelectedCategoryId, brandId = Model.SelectedBrandId, search = Model.SearchTerm, minPrice = Model.MinPrice, maxPrice = Model.MaxPrice })" selected="@(Model.SortOrder == "price_asc" ? "selected" : null)">Price: Low to High</option>
+                        <option value="@Url.Action("Index", new { sort = "price_desc", categoryId = Model.SelectedCategoryId, brandId = Model.SelectedBrandId, search = Model.SearchTerm, minPrice = Model.MinPrice, maxPrice = Model.MaxPrice })" selected="@(Model.SortOrder == "price_desc" ? "selected" : null)">Price: High to Low</option>
+                        <option value="@Url.Action("Index", new { sort = "name_asc", categoryId = Model.SelectedCategoryId, brandId = Model.SelectedBrandId, search = Model.SearchTerm, minPrice = Model.MinPrice, maxPrice = Model.MaxPrice })" selected="@(Model.SortOrder == "name_asc" ? "selected" : null)">Name: A-Z</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                @foreach (var product in Model.Products)
+                {
+                    <div class="col-md-4 col-sm-6">
+                        <partial name="_ProductCard" model="product" />
+                    </div>
+                }
+            </div>
+
+            @if (Model.TotalPages > 1)
+            {
+                <nav class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        @if (Model.PageNumber > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" asp-action="Index" asp-route-page="@(Model.PageNumber - 1)"
+                                   asp-route-categoryId="@Model.SelectedCategoryId" asp-route-brandId="@Model.SelectedBrandId"
+                                   asp-route-search="@Model.SearchTerm" asp-route-sort="@Model.SortOrder"
+                                   asp-route-minPrice="@Model.MinPrice" asp-route-maxPrice="@Model.MaxPrice">Previous</a>
+                            </li>
+                        }
+
+                        @for (int i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.TotalPages, Model.PageNumber + 2); i++)
+                        {
+                            <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                                <a class="page-link" asp-action="Index" asp-route-page="@i"
+                                   asp-route-categoryId="@Model.SelectedCategoryId" asp-route-brandId="@Model.SelectedBrandId"
+                                   asp-route-search="@Model.SearchTerm" asp-route-sort="@Model.SortOrder"
+                                   asp-route-minPrice="@Model.MinPrice" asp-route-maxPrice="@Model.MaxPrice">@i</a>
+                            </li>
+                        }
+
+                        @if (Model.PageNumber < Model.TotalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" asp-action="Index" asp-route-page="@(Model.PageNumber + 1)"
+                                   asp-route-categoryId="@Model.SelectedCategoryId" asp-route-brandId="@Model.SelectedBrandId"
+                                   asp-route-search="@Model.SearchTerm" asp-route-sort="@Model.SortOrder"
+                                   asp-route-minPrice="@Model.MinPrice" asp-route-maxPrice="@Model.MaxPrice">Next</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        </div>
+    </div>
+</div>

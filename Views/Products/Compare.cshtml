@@ -1,0 +1,168 @@
+﻿@model MobileShop.ViewModels.CompareProductsViewModel
+@{
+    ViewData["Title"] = "Compare Products";
+}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Compare Products</h2>
+            <p class="text-muted mb-0">Compare mobile specifications, pricing, ratings and features.</p>
+        </div>
+        <a asp-controller="Products"
+           asp-action="Index"
+           class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left"></i> Continue Shopping
+        </a>
+    </div>
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle compare-table mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 220px;">Feature</th>
+                        @foreach (var product in Model.Products)
+                        {
+                            <th class="text-center">
+                                <div class="p-2">
+                                    <div class="position-relative p-2">
+                                        <button type="button"
+                                                class="btn btn-danger btn-sm position-absolute top-0 end-0"
+                                                onclick="removeCompareAndReload(@product.Id)">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                        <a asp-controller="Products"
+                                           asp-action="Details"
+                                           asp-route-id="@product.Id">
+                                            <img src="@(product.MainImageUrl ?? "/images/no-image.png")"
+                                                 class="img-fluid rounded mb-3"
+                                                 style="height:180px; object-fit:cover;" />
+                                        </a>
+                                        <h6 class="fw-bold">@product.Name</h6>
+                                    </div>
+                                    <p class="text-muted small mb-2">
+                                        @product.Brand?.Name
+                                    </p>
+                                    <div class="mb-2">
+                                        @if (product.AverageRating > 0)
+                                        {
+                                            <span class="text-warning">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    if (i <= product.AverageRating)
+                                                    {
+                                                        <i class="bi bi-star-fill"></i>
+                                                    }
+                                                    else if (i - 0.5 <= product.AverageRating)
+                                                    {
+                                                        <i class="bi bi-star-half"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="bi bi-star"></i>
+                                                    }
+                                                }
+                                            </span>
+                                        }
+                                    </div>
+                                    <h5 class="text-primary fw-bold mb-3">
+                                        ₹@product.SalePrice.ToString("N0")
+                                    </h5>
+                                    <div class="d-grid gap-2">
+                                        <form asp-controller="ShoppingCart"
+                                              asp-action="AddToCart"
+                                              method="post">
+                                            <input type="hidden" name="productId" value="@product.Id" />
+                                            <button type="submit"
+                                                    class="btn btn-primary btn-sm w-100"
+                                                    @(product.StockQuantity <= 0 ? "disabled" : "")>
+                                                <i class="bi bi-cart-plus"></i> Add to Cart
+                                            </button>
+                                        </form>
+                                        <a asp-controller="Products"
+                                           asp-action="Details"
+                                           asp-route-id="@product.Id"
+                                           class="btn btn-outline-secondary btn-sm">
+                                            View Details
+                                        </a>
+                                   </div>
+                               </div>
+                            </th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="fw-bold bg-light">Model</td>
+                        @foreach (var product in Model.Products)
+                        {
+                            <td>@product.Model</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="fw-bold bg-light">Category</td>
+                        @foreach (var product in Model.Products)
+                        {
+                            <td>@product.Category?.Name</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="fw-bold bg-light">Stock</td>
+                        @foreach (var product in Model.Products)
+                        {
+                            <td>
+                                @if (product.StockQuantity > 0)
+                                {
+                                    <span class="badge bg-success">In Stock</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Out of Stock</span>
+                                }
+                            </td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="fw-bold bg-light">Short Description</td>
+                        @foreach (var product in Model.Products)
+                        {
+                            <td>@product.ShortDescription</td>
+                        }
+                    </tr>
+                    @foreach (var specName in Model.SpecificationNames)
+                    {
+                        <tr>
+                            <td class="fw-bold bg-light">@specName</td>
+                            @foreach (var product in Model.Products)
+                            {
+                                var specification = product.Specifications
+                                    .FirstOrDefault(s => s.Name == specName);
+
+                                <td>
+                                    @(specification?.Value ?? "-")
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<style>
+    .compare-table th,
+    .compare-table td {
+        min-width: 240px;
+        vertical-align: middle;
+    }
+    .compare-table td:first-child,
+    .compare-table th:first-child {
+        min-width: 220px;
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        background: #fff;
+    }
+    .compare-table tbody td:first-child {
+        background: #f8f9fa;
+    }
+</style>

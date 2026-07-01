@@ -1,0 +1,279 @@
+﻿@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="row">
+    <div class="col-12">
+        <h3 class="mb-4">Dashboard Overview</h3>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Total Orders</h6>
+                        <h3 class="mb-0">@Model.TotalOrders</h3>
+                    </div>
+                    <i class="bi bi-cart3 display-4 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Total Revenue</h6>
+                        <h3 class="mb-0">RS @Model.TotalRevenue.ToString("N0")</h3>
+                    </div>
+                    <i class="bi bi-currency-rupee display-4 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Total Products</h6>
+                        <h3 class="mb-0">@Model.TotalProducts</h3>
+                    </div>
+                    <i class="bi bi-phone display-4 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Total Customers</h6>
+                        <h3 class="mb-0">@Model.TotalCustomers</h3>
+                    </div>
+                    <i class="bi bi-people display-4 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-warning text-uppercase mb-1">Pending Orders</h6>
+                        <h3 class="mb-0">@Model.PendingOrders</h3>
+                    </div>
+                    <i class="bi bi-clock-history display-4 text-warning opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-danger">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-danger text-uppercase mb-1">Low Stock</h6>
+                        <h3 class="mb-0">@Model.LowStockProducts</h3>
+                    </div>
+                    <i class="bi bi-exclamation-triangle display-4 text-danger opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-graph-up"></i> Monthly Sales</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="salesChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-trophy"></i> Top Products</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="topProductsChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Orders & Top Products Table -->
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Orders</h5>
+                <a asp-controller="Orders" asp-action="Index" class="btn btn-sm btn-primary">View All</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model.RecentOrders)
+                            {
+                                <tr>
+                                    <td>@order.OrderNumber</td>
+                                    <td>@order.CustomerName</td>
+                                    <td>RS @order.TotalAmount.ToString("N0")</td>
+                                    <td>
+                                        <span class="badge @(order.Status switch {
+                                            "Pending" => "bg-warning",
+                                            "Processing" => "bg-info",
+                                            "Shipped" => "bg-primary",
+                                            "Delivered" => "bg-success",
+                                            "Cancelled" => "bg-danger",
+                                            _ => "bg-secondary"
+                                        })">@order.Status</span>
+                                    </td>
+                                    <td>@order.OrderDate.ToString("MMM dd, HH:mm")</td>
+                                    <td>
+                                        <a asp-controller="Orders" asp-action="Details" asp-route-id="@order.OrderId" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-trophy"></i> Top Selling Products</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    @foreach (var product in Model.TopProducts)
+                    {
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">@product.ProductName</h6>
+                                <small class="text-muted">@product.UnitsSold units sold</small>
+                            </div>
+                            <span class="badge bg-success">RS @product.Revenue.ToString("N0")</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Monthly Sales Chart
+        var salesCtx = document.getElementById('salesChart').getContext('2d');
+        var salesChart = new Chart(salesCtx, {
+            type: 'line',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.MonthlySales.Select(m => $"'{m.Month}'")))],
+                datasets: [{
+                    label: 'Sales (RS )',
+                    data: [@string.Join(",", Model.MonthlySales.Select(m => m.Sales))],
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Orders',
+                    data: [@string.Join(",", Model.MonthlySales.Select(m => m.Orders))],
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.4,
+                    yAxisID: 'y1'
+                }]
+            },
+            options: {
+                responsive: true,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Sales (RS )'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Orders'
+                        },
+                        grid: {
+                            drawOnChartArea: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Top Products Chart
+        var productsCtx = document.getElementById('topProductsChart').getContext('2d');
+        var productsChart = new Chart(productsCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.TopProducts.Select(p => $"'{p.ProductName}'")))],
+                datasets: [{
+                    data: [@string.Join(",", Model.TopProducts.Select(p => p.Revenue))],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    </script>
+}

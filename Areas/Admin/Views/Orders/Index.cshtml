@@ -1,0 +1,109 @@
+﻿@model List<Order>
+@{
+    ViewData["Title"] = "Orders";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3><i class="bi bi-cart3"></i> Orders</h3>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" name="search" class="form-control" placeholder="Search order # or customer..." value="@ViewBag.Search" />
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    @foreach (var status in ViewBag.Statuses)
+                    {
+                        <option value="@status" selected="@(ViewBag.CurrentStatus == status ? "selected" : null)">@status</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-outline-primary w-100"><i class="bi bi-search"></i> Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th style="color:black">Order #</th>
+                    <th style="color:black">Customer</th>
+                    <th style="color:black">Items</th>
+                    <th style="color:black">Total</th>
+                    <th style="color:black">Status</th>
+                    <th style="color:black">Payment</th>
+                    <th style="color:black">Date</th>
+                    <th style="color:black">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model)
+                {
+                    <tr>
+                        <td><strong>@order.OrderNumber</strong></td>
+                        <td>
+                            @if (order.User != null)
+                            {
+                                <span>@order.User.FullName</span>
+                                <br /><small class="text-muted">@order.User.Email</small>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Guest</span>
+                            }
+                        </td>
+                        <td>@order.OrderItems.Count items</td>
+                        <td>RS @order.TotalAmount.ToString("N0")</td>
+                        <td>
+                            <span class="badge @(order.Status switch {
+                                OrderStatus.Pending => "bg-warning",
+                                OrderStatus.Processing => "bg-info",
+                                OrderStatus.Shipped => "bg-primary",
+                                OrderStatus.Delivered => "bg-success",
+                                OrderStatus.Cancelled => "bg-danger",
+                                _ => "bg-secondary"
+                            })">@order.Status</span>
+                        </td>
+                        <td>
+                            <span class="badge @(order.PaymentStatus == PaymentStatus.Paid ? "bg-success" : "bg-warning")">
+                                @order.PaymentStatus
+                            </span>
+                        </td>
+                        <td>@order.OrderDate.ToString("MMM dd, yyyy HH:mm")</td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a asp-action="Invoice" asp-route-id="@order.Id" class="btn btn-sm btn-outline-info" target="_blank">
+                                <i class="bi bi-printer"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@if (ViewBag.TotalPages > 1)
+{
+    <nav class="mt-3">
+        <ul class="pagination justify-content-center">
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-status="@ViewBag.CurrentStatus" asp-route-search="@ViewBag.Search">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}

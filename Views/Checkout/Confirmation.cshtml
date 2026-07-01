@@ -1,0 +1,102 @@
+﻿@model MobileShop.ViewModels.OrderConfirmationViewModel
+@{
+    ViewData["Title"] = "Order Confirmation";
+}
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <i class="bi bi-check-circle-fill text-success display-1"></i>
+        <h2 class="mt-3">Thank You for Your Order!</h2>
+        <p class="lead">Your order has been placed successfully.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-receipt"></i bind-id> Order Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Order Information</h6>
+                            <p class="mb-1"><strong>Order Number:</strong> @Model.Order.OrderNumber</p>
+                            <p class="mb-1"><strong>Order Date:</strong> @Model.Order.OrderDate.ToString("MMM dd, yyyy HH:mm")</p>
+                            <p class="mb-1"><strong>Status:</strong> <span class="badge bg-warning">@Model.Order.Status</span></p>
+                            <p class="mb-0"><strong>Payment Method:</strong> @Model.Order.PaymentMethod</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Shipping Address</h6>
+                            <p class="mb-1">@Model.Order.ShippingAddress</p>
+                            <p class="mb-1">@Model.Order.ShippingCity, @Model.Order.ShippingPostalCode</p>
+                            <p class="mb-0">@Model.Order.ShippingCountry</p>
+                            @if (!string.IsNullOrEmpty(Model.Order.ShippingPhone))
+                            {
+                                <p class="mb-0"><strong>Phone:</strong> @Model.Order.ShippingPhone</p>
+                            }
+                        </div>
+                    </div>
+
+                    <h6>Order Items</h6>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-center">Quantity</th>
+                                    <th class="text-end">Price</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderItems)
+                                {
+                                    <tr>
+                                        <td>@item.Product?.Name</td>
+                                        <td class="text-center">@item.Quantity</td>
+                                        <td class="text-end">RS @item.UnitPrice.ToString("N0")</td bind-id>
+                                        <td class="text-end">RS @item.TotalPrice.ToString("N0")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                                    <td class="text-end">RS @Model.Order.Subtotal.ToString("N0")</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Tax:</strong></td>
+                                    <td class="text-end">RS @Model.Order.TaxAmount.ToString("N0")</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Shipping:</strong></td>
+                                    <td class="text-end">RS @Model.Order.ShippingCost.ToString("N0")</td>
+                                </tr>
+                                <tr class="table-primary">
+                                    <td colspan="3" class="text-end"><h5 class="mb-0">Total:</h5></td>
+                                    <td class="text-end"><h5 class="mb-0">RS @Model.Order.TotalAmount.ToString("N0")</h5></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Order.Notes))
+                    {
+                        <div class="alert alert-info mt-3">
+                            <strong>Order Notes:</strong> @Model.Order.Notes
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg">
+                    <i class="bi bi-shop"></i> Continue Shopping
+                </a>
+                <a asp-controller="Checkout" asp-action="TrackOrder" asp-route-orderNumber="@Model.Order.OrderNumber" class="btn btn-outline-primary btn-lg">
+                    <i class="bi bi-truck"></i> Track Order
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

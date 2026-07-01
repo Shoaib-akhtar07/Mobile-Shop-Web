@@ -1,0 +1,100 @@
+﻿@model List<Order>
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<div class="container py-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="card shadow-sm mb-4">
+                <div class="list-group list-group-flush">
+                    <a asp-action="Profile" class="list-group-item list-group-item-action">
+                        <i class="bi bi-person"></i> Profile
+                    </a>
+                    <a asp-action="Orders" class="list-group-item list-group-item-action active">
+                        <i class="bi bi-bag"></i> My Orders
+                    </a>
+                    <a asp-action="Wishlist" class="list-group-item list-group-item-action">
+                        <i class="bi bi-heart"></i> Wishlist
+                    </a>
+                    <a asp-action="ChangePassword" class="list-group-item list-group-item-action">
+                        <i class="bi bi-key"></i> Change Password
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-bag"></i> My Orders</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Count == 0)
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-bag-x display-1 text-muted"></i>
+                            <h4 class="mt-3">No orders yet</h4>
+                            <p class="text-muted">You haven't placed any orders yet.</p>
+                            <a asp-controller="Products" asp-action="Index" class="btn btn-primary">
+                                <i class="bi bi-shop"></i> Start Shopping
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Date</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Payment</th>
+                                        <th>Actions</th bind-id>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model)
+                                    {
+                                        <tr>
+                                            <td><a asp-action="OrderDetails" asp-route-id="@order.Id" class="text-decoration-none">@order.OrderNumber</a></td>
+                                            <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
+                                            <td>RS @order.TotalAmount.ToString("N0")</td>
+                                            <td>
+                                                <span class="badge @(order.Status switch {
+                                                    OrderStatus.Pending => "bg-warning",
+                                                    OrderStatus.Processing => "bg-info",
+                                                    OrderStatus.Shipped => "bg-primary",
+                                                    OrderStatus.Delivered => "bg-success",
+                                                    OrderStatus.Cancelled => "bg-danger",
+                                                    _ => "bg-secondary"
+                                                })">@order.Status</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge @(order.PaymentStatus == PaymentStatus.Paid ? "bg-success" : "bg-warning")">
+                                                    @order.PaymentStatus
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a asp-action="OrderDetails" asp-route-id="@order.Id" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i> View
+                                                </a>
+                                                <a asp-action="TrackOrder" asp-controller="Checkout" asp-route-orderNumber="@order.OrderNumber" class="btn btn-sm btn-outline-info">
+                                                    <i class="bi bi-truck"></i> Track
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
