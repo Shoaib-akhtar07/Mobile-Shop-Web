@@ -1,0 +1,60 @@
+## Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio files
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstats
+*.csproj.user
+
+## Rider
+.idea/
+*.sln.iml
+
+## NuGet
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nupkg
+**/packages/repositories.config
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## .NET
+*.DotSettings.user
+launchSettings.json
+
+## Secrets & Config with sensitive data
+appsettings.Production.json
+appsettings.*.Local.json
+appsettings.*.Development.json
+secrets.json
+**/secrets.json
+
+## User secrets
+*.secret
+
+## OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+## Misc
+*.swp
+*.tmp
+*.bak
+*.orig
+~$*

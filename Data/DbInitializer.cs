@@ -1,6 +1,6 @@
-﻿
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using MobileShop.Data;
 using MobileShop.Models;
 
@@ -14,6 +14,7 @@ namespace MobileShop.Data
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
             // Apply pending migrations
             await context.Database.MigrateAsync();
@@ -22,7 +23,7 @@ namespace MobileShop.Data
             await SeedRolesAsync(roleManager);
 
             // Seed Admin User
-            await SeedAdminUserAsync(userManager);
+            await SeedAdminUserAsync(userManager, configuration);
 
             // Seed Sample Products
             await SeedProductsAsync(context);
@@ -41,10 +42,10 @@ namespace MobileShop.Data
             }
         }
 
-        private static async Task SeedAdminUserAsync(UserManager<ApplicationUser> userManager)
+        private static async Task SeedAdminUserAsync(UserManager<ApplicationUser> userManager, IConfiguration configuration)
         {
-            const string adminEmail = "admin@mobileshop.com";
-            const string adminPassword = "Admin@123";
+            var adminEmail = configuration["AdminSettings:Email"] ?? "admin@mobileshop.com";
+            var adminPassword = configuration["AdminSettings:Password"] ?? "ChangeMe@123";
 
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
             if (adminUser == null)
@@ -55,8 +56,7 @@ namespace MobileShop.Data
                     Email = adminEmail,
                     FirstName = "System",
                     LastName = "Administrator",
-                    EmailConfirmed = true,
-                    PhoneNumber = "+92-3143076781"
+                    EmailConfirmed = true
                 };
 
                 var result = await userManager.CreateAsync(adminUser, adminPassword);

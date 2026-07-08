@@ -1,0 +1,30 @@
+# .NET Dependencies (NuGet Packages)
+# Install with: dotnet restore
+
+# Web Framework
+Microsoft.AspNetCore.Authentication.Facebook >= 10.0.7
+Microsoft.AspNetCore.Authentication.Google >= 10.0.7
+Microsoft.AspNetCore.Identity.EntityFrameworkCore >= 10.0.7
+
+# Database
+Microsoft.EntityFrameworkCore >= 10.0.7
+Microsoft.EntityFrameworkCore.SqlServer >= 10.0.7
+Microsoft.EntityFrameworkCore.Tools >= 10.0.7
+
+# Code Generation
+Microsoft.VisualStudio.Web.CodeGeneration.Design >= 10.0.2
+
+# Utilities
+AutoMapper.Extensions.Microsoft.DependencyInjection >= 12.0.1
+ClosedXML >= 0.105.0
+DocumentFormat.OpenXml >= 3.1.1
+Stripe.net >= 51.1.0
+
+# Required Secrets (NOT included in repo - configure via User Secrets):
+# - ConnectionStrings:DefaultConnection (SQL Server)
+# - AdminSettings:Email
+# - AdminSettings:Password
+# - Stripe:PublishableKey & Stripe:SecretKey
+# - EmailSettings:SmtpServer, SmtpPort, SenderEmail, SenderPassword
+# - Facebook:AppId & Facebook:AppSecret (if using Facebook login)
+# - Google:ClientId & Google:ClientSecret (if using Google login)
